@@ -54,7 +54,9 @@ class FileSystemTemplateCatalog:
             return ()
         return tuple(
             TemplateInfo(template_id=path.name, source=path)
-            for path in sorted(self._templates_root.iterdir(), key=lambda item: item.name)
+            for path in sorted(
+                self._templates_root.iterdir(), key=lambda item: item.name
+            )
             if path.is_dir()
         )
 

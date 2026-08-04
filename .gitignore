@@ -1,10 +1,47 @@
+```
+# Compiled and build artifacts
+*.pyc
 __pycache__/
-*.py[cod]
-*.egg-info/
-.pytest_cache/
-.ruff_cache/
+*.o
+*.obj
+*.so
+*.dll
+*.exe
+*.class
+*.out
+
+# Dependencies
 .venv/
+venv/
+.env
+.env.local
+.env.*
+
+# Build and distribution
 build/
 dist/
-.env
+*.egg-info/
 
+# Testing
+.pytest_cache/
+.coverage
+coverage/
+htmlcov/
+
+# Editors and IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+# Logs
+*.log
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Type checking
+.mypy_cache/
+```

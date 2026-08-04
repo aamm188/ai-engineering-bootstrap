@@ -15,11 +15,12 @@ The CLI will use Typer for commands and Rich for human-readable output. Applicat
 
 ```text
 ai-bootstrap audit [--format table|json]
+ai-bootstrap doctor
 ai-bootstrap list-templates
 ai-bootstrap create-project PROJECT_NAME --template TEMPLATE_NAME
 ```
 
-The audit is read-only. Project creation writes a new folder in the current directory and fails if that folder already exists.
+The audit and doctor commands are read-only. Project creation writes a new folder in the current directory and fails if that folder already exists.
 
 ## Development baseline
 
@@ -59,6 +60,7 @@ The following documents define the project architecture and development process.
 | docs/development/git-workflow.md | Git workflow |
 | docs/development/github-setup.md | GitHub & SSH setup |
 | docs/development/coding-standards.md | Coding standards |
+| docs/development/bootstrap-process.md | Environment bootstrap and doctor command |
 | ADR/ | Architecture Decision Records |
 
 These documents are the primary entry points for understanding the project.

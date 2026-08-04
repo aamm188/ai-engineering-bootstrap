@@ -9,7 +9,9 @@ from ai_engineering_bootstrap.probes.executables import ExecutableProbe
 def test_executable_probe_reports_version_without_shell() -> None:
     calls: list[tuple[tuple[str, ...], dict[str, object]]] = []
 
-    def runner(command: tuple[str, ...], **kwargs: object) -> subprocess.CompletedProcess[str]:
+    def runner(
+        command: tuple[str, ...], **kwargs: object
+    ) -> subprocess.CompletedProcess[str]:
         calls.append((command, kwargs))
         return subprocess.CompletedProcess(command, 0, "tool version 1.2\n", "")
 

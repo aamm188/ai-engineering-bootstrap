@@ -34,10 +34,10 @@ class OperatingSystemProbe:
                     "architecture": self._machine() or "unknown",
                 },
             )
-       # except Exception as error:  # Defensive boundary around platform APIs.
-        except BaseException as error: # Defensive boundary around platform APIs.
+        # except Exception as error:  # Defensive boundary around platform APIs.
+        except BaseException as error:  # Defensive boundary around platform APIs.
             if isinstance(error, (KeyboardInterrupt, SystemExit)):
-               raise
+                raise
 
             return AuditCheck(
                 name="operating_system",

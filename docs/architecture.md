@@ -2,7 +2,7 @@
 
 ## Scope
 
-Phase 1 is a deterministic Python 3.12 CLI with two use cases: read-only environment auditing and project generation from three predefined templates. The capabilities share presentation and domain conventions but remain independently coordinated.
+Phase 1 is a deterministic Python 3.12 CLI with three use cases: read-only environment auditing, environment validation via the Environment Doctor, and project generation from three predefined templates. The capabilities share presentation and domain conventions but remain independently coordinated.
 
 ## Dependency direction
 
@@ -14,9 +14,10 @@ CLI / Rich presentation
 ```
 
 - `cli.py` parses commands, invokes services, formats results, and maps expected failures to stable exit codes.
-- `audit.py` and `generation.py` coordinate use cases without presentation logic.
+- `audit.py` coordinates the audit use case and provides the doctor command entry point without presentation logic.
+- `generation.py` coordinates project generation without presentation logic.
 - `models.py` defines typed requests and results without printing or filesystem access.
-- `probes/` isolates platform and subprocess inspection.
+- `probes/` isolates platform and subprocess inspection for both audit and doctor functionality.
 - Template resource access and filesystem writes belong to generation infrastructure.
 
 Dependencies are explicit. Phase 1 does not use global state, a dependency-injection container, repository pattern, plug-in system, or agent framework.
@@ -32,7 +33,7 @@ Generation validates identifiers, project names, paths, and destination non-exis
 - Audit statuses: `available`, `not_found`, `unsupported`, and `error`.
 - Template identifiers: `ai-app-template-v1`, `ml-template-v1`, and `ai-research-template-v1`.
 - Destination policy: fail when the target exists; no merge or overwrite mode.
-- CLI commands: `ai-bootstrap audit`, `ai-bootstrap list-templates`, and `ai-bootstrap create-project PROJECT_NAME --template TEMPLATE_NAME`.
+- CLI commands: `ai-bootstrap audit`, `ai-bootstrap doctor`, `ai-bootstrap list-templates`, and `ai-bootstrap create-project PROJECT_NAME --template TEMPLATE_NAME`.
 
 Changes to accepted interfaces, models, commands, output behavior, or collision semantics require a new or superseding ADR.
 

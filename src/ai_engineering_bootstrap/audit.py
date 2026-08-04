@@ -10,6 +10,11 @@ from ai_engineering_bootstrap.models import (
     AuditReport,
     AuditStatus,
 )
+from ai_engineering_bootstrap.probes.environment import (
+    EditableInstallProbe,
+    PythonPackageProbe,
+    VirtualEnvironmentProbe,
+)
 from ai_engineering_bootstrap.probes.executables import docker_probe, git_probe
 from ai_engineering_bootstrap.probes.gpu import GpuProbe
 from ai_engineering_bootstrap.probes.system import (
@@ -28,13 +33,12 @@ class AuditService:
         """Run every configured probe and return a complete ordered report."""
         checks: list[AuditCheck] = []
         for probe in self._probes:
-
             try:
                 checks.append(probe.run())
-            except BaseException as error: # Preserve the aggregate report while allowing interruption signals.
-                 if isinstance(error, (KeyboardInterrupt, SystemExit)):
-                     raise
-                 checks.append(        
+            except BaseException as error:  # Preserve the aggregate report while allowing interruption signals.
+                if isinstance(error, (KeyboardInterrupt, SystemExit)):
+                    raise
+                checks.append(
                     AuditCheck(
                         name=type(probe).__name__,
                         status=AuditStatus.ERROR,
@@ -53,5 +57,23 @@ def default_audit_service() -> AuditService:
             git_probe(),
             docker_probe(),
             GpuProbe(),
+        )
+    )
+
+
+def doctor_audit_service() -> AuditService:
+    """Build the audit service for the Environment Doctor feature."""
+    return AuditService(
+        (
+            PythonVersionProbe(),
+            VirtualEnvironmentProbe(),
+            EditableInstallProbe(),
+            PythonPackageProbe("typer"),
+            PythonPackageProbe("rich"),
+            PythonPackageProbe("pytest"),
+            PythonPackageProbe("ruff"),
+            git_probe(),
+            docker_probe(),
+            OperatingSystemProbe(),
         )
     )
