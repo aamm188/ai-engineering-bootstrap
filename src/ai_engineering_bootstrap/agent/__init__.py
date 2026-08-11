@@ -15,12 +15,22 @@ from ai_engineering_bootstrap.agent.provider import (
     RemoteAPIProvider,
     build_provider,
 )
+from ai_engineering_bootstrap.agent.runtime import (
+    AgentRuntime,
+    AgentRuntimeResult,
+    AgentSession,
+    AgentSessionStatus,
+)
 
 __all__ = [
     "AgentDecision",
     "AgentDecisionEngine",
     "AgentPlanningResult",
     "AgentPlanningService",
+    "AgentRuntime",
+    "AgentRuntimeResult",
+    "AgentSession",
+    "AgentSessionStatus",
     "InProcessProvider",
     "LLMProvider",
     "LocalServerProvider",

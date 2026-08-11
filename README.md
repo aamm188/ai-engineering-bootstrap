@@ -78,6 +78,7 @@ ai-bootstrap audit [--format table|json]
 ai-bootstrap doctor
 ai-bootstrap plan
 ai-bootstrap bootstrap
+ai-bootstrap run-pipeline [--real-execution]
 ai-bootstrap list-templates
 ai-bootstrap create-project PROJECT_NAME --template TEMPLATE_NAME
 ```
@@ -89,8 +90,9 @@ context-aware recommendations.
 
 `plan` converts the current audit report into an `ExecutionPlan`.
 
-`bootstrap` currently demonstrates the audit → plan workflow. It does **not** yet
-perform system changes.
+`run-pipeline` runs the controlled backend workflow. Safe Mode remains non-mutating;
+real execution is explicit and remains subject to validation, safety, approval,
+execution, verification, and bounded recovery.
 
 ## Architecture
 
@@ -107,7 +109,13 @@ Planner
   ↓
 ExecutionPlan
   ↓
+Validation / Safety / Approval
+  ↓
 Executor
+  ↓
+Verification
+  ↓
+Recovery / Re-plan
   ↓
 CLI / GUI
 ```

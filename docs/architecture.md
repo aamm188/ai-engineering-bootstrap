@@ -171,7 +171,30 @@ Executor
 
 No remediation should be added to Doctor, Planner, CLI, or GUI.
 
-## 8. Application / Presentation
+## 8. Recovery, Evidence, and Agent Runtime
+
+### Recovery boundary
+
+Recovery is part of the application orchestration layer. A replanable failure
+causes a fresh Doctor audit and deterministic Planner run. The candidate plan is
+validated again and the same approval/safety boundary is applied before execution.
+Replanning is explicitly bounded; it is not an open-ended Agent loop.
+
+### Run evidence
+
+Each pipeline run records immutable, ordered evidence events for audit, planning,
+validation, approval, execution, verification, and recovery. The current implementation
+keeps evidence in memory; durable storage is a later concern and is not required by
+this milestone.
+
+### Agent session boundary
+
+The Agent runtime owns only a bounded decision/planning session. It may call the
+configured provider and Planner bridge, but it has no execution method, shell access,
+or direct handler access. Execution remains downstream of validation, approval,
+SafetyGate, Executor, and Verification.
+
+## 9. Application / Presentation
 
 CLI and GUI are application/presentation entry points.
 
@@ -187,7 +210,7 @@ They must not contain independent business rules.
 The future GUI is the primary product interface. CLI presentation should remain
 stable, deterministic, scriptable, and useful without becoming a second product.
 
-## 9. Determinism
+## 10. Determinism
 
 For identical inputs/environment state, the system should produce stable:
 
@@ -202,16 +225,17 @@ For identical inputs/environment state, the system should produce stable:
 
 Determinism is required for testing, CI/CD, debugging, and future GUI behavior.
 
-## 10. Read/Write Safety
+## 11. Read/Write Safety
 
 Audit and planning commands are read-only.
 
-The current `bootstrap` command is also non-mutating: it demonstrates audit and
-planning but does not execute fixes.
+The controlled `run-pipeline` application flow may invoke the Executor, but only
+after validation, SafetyGate, and any required human approval. Safe Mode remains
+non-mutating.
 
-Only the future Executor may perform system changes.
+Only the Executor performs approved environment changes.
 
-## 11. Existing Generation Boundary
+## 12. Existing Generation Boundary
 
 Project generation remains a separate application capability.
 
@@ -220,7 +244,7 @@ controlled file generation according to the accepted generation ADR.
 
 It must not be mixed with Doctor/Planner business logic.
 
-## 12. Architecture Change Rule
+## 13. Architecture Change Rule
 
 Accepted interfaces, model contracts, dependency direction, collision semantics,
 or read/write boundaries must not be changed casually.
@@ -229,7 +253,7 @@ Use a new or superseding ADR for architectural changes.
 
 Do not redesign unrelated subsystems while implementing a feature.
 
-## 13. Agent and Capability Boundary
+## 14. Agent and Capability Boundary
 
 The Agent/LLM layer is decision-only. It consumes context and capability metadata and
 returns a structured `AgentDecision`. It must not contain executor handlers,
@@ -251,7 +275,7 @@ Context + Capability Metadata
 each advertised capability maps to a registered action and an explicit safety policy.
 Capability discovery does not grant execution authority.
 
-## 14. Controlled Dependency Remediation
+## 15. Controlled Dependency Remediation
 
 Project dependencies are discovered from `pyproject.toml` using read-only metadata
 inspection. Missing Python dependencies become typed `install_python_package`
@@ -283,7 +307,7 @@ argument arrays and `shell=False`.
 
 Safe mode never mutates the environment; it simulates remediation actions.
 
-## 15. LLM Provider Boundary
+## 16. LLM Provider Boundary
 
 The Agent provider contract supports three required deployment modes:
 
@@ -294,7 +318,7 @@ The Agent provider contract supports three required deployment modes:
 
 Provider selection does not change Agent, Planner, Safety, or Executor contracts.
 
-## 16. Verification Boundary
+## 17. Verification Boundary
 
 A successful handler result is not considered proof of the environment state.
 Registered verifiers independently inspect the target state. Safe-mode simulated

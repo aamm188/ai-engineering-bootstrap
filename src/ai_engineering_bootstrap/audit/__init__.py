@@ -6,6 +6,11 @@ from ai_engineering_bootstrap.audit.dependencies import (
     DependencyDiscovery,
     ProjectDependencyProbe,
 )
+from ai_engineering_bootstrap.audit.evidence import (
+    EvidenceEvent,
+    ExecutionAuditService,
+    RunEvidence,
+)
 from ai_engineering_bootstrap.audit.models import (
     AuditCheck,
     AuditReport,
@@ -42,4 +47,4 @@ def default_audit_service(project_root: Path | None = None) -> AuditService:
     ]
     return AuditService(probes=probes)
 
-__all__ = ["AuditCheck", "AuditReport", "AuditService", "EnvironmentReadiness", "default_audit_service"]
+__all__ = ["AuditCheck", "AuditReport", "AuditService", "EnvironmentReadiness", "EvidenceEvent", "ExecutionAuditService", "RunEvidence", "default_audit_service"]

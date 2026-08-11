@@ -11,6 +11,8 @@ requires-python = ">=3.12"
 dependencies = [
     "rich",
     "typer",
+    "requests",
+    "colorama"
 ]
 
 [project.scripts]

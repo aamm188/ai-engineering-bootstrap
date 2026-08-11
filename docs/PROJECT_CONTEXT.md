@@ -247,7 +247,7 @@ Priority order:
 The CLI must remain stable and automation-friendly, but professional GUI capability
 is a major product objective.
 
-## Current Foundation Status — Steps 19–24
+## Current Foundation Status — Steps 19–27
 
 The following milestones are implemented on the current baseline:
 
@@ -267,7 +267,14 @@ The following milestones are implemented on the current baseline:
 24. **Dependency Installation Workflow** — the complete path from Doctor through
     planning, validation, safety, approval, real execution, and independent
     verification is available as a backend workflow.
+25. **Failure → Recovery → Re-plan Integration** — replanable failures trigger a fresh
+    audit and deterministic plan rebuild with a bounded replan count; the safety and
+    approval boundaries are reapplied before the new plan can execute.
+26. **Execution Audit & Run Evidence** — each pipeline run emits immutable, ordered
+    evidence events with run identity, timestamps, stage status, and recovery details.
+27. **Agent Runtime / Session Boundary** — Agent decision/planning is isolated inside
+    a bounded session object with explicit lifecycle identity and no execution API.
 
-The next planned milestone is **25. Failure → Recovery → Re-plan Integration**.
+The next planned milestone is **28. End-to-End Autonomous Environment Bootstrap**.
 Cursor installation/engineering-environment bootstrap remains a later milestone and
 must not be mixed into dependency remediation for project runtime dependencies.

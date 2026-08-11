@@ -51,7 +51,7 @@ class ExecutionPlanValidator:
         if not plan.actions:
             return ValidationResult(is_valid=True, errors=[], warnings=[])
 
-        seen_ids: set[str] = set()
+        seen_actions: set[tuple[str, str]] = set()
 
         for action in plan.actions:
             # 1. بررسی خالی نبودن action_id
@@ -60,9 +60,14 @@ class ExecutionPlanValidator:
                 continue
 
             # 2. بررسی تکراری نبودن
-            if action.action_id in seen_ids:
-                errors.append(f"Duplicate action ID found: '{action.action_id}'.")
-            seen_ids.add(action.action_id)
+            package = str(action.context.get("package", "")).strip().lower()
+            duplicate_key = (action.action_id, package)
+            if duplicate_key in seen_actions:
+                errors.append(
+                    f"Duplicate action found: '{action.action_id}'"
+                    + (f" for package '{package}'." if package else ".")
+                )
+            seen_actions.add(duplicate_key)
 
             # 3. بررسی عضویت در لیست سفید (Allowlist)
             if action.action_id not in self.ALLOWED_ACTIONS:

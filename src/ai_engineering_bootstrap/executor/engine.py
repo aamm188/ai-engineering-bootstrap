@@ -32,9 +32,11 @@ class ExecutorEngine:
         self,
         mode: ExecutionMode = ExecutionMode.SAFE,
         is_approved: bool = False,
+        rejected_action_indexes: set[int] | None = None,
     ) -> None:
         self._mode = mode
         self._is_approved = is_approved
+        self._rejected_action_indexes = rejected_action_indexes or set()
         self._registry = ActionRegistry()
         self._safety_gate = SafetyGate()
         self._verifier_registry = VerifierRegistry()
@@ -46,9 +48,12 @@ class ExecutorEngine:
     ) -> list[VerificationResult]:
         """Verify successful action results using independent read-only verifiers."""
         results: list[VerificationResult] = []
-        by_action = {result.action_id: result for result in execution_result.results}
-        for action in plan.actions:
-            result = by_action.get(action.action_id)
+        for action_index, action in enumerate(plan.actions):
+            result = (
+                execution_result.results[action_index]
+                if action_index < len(execution_result.results)
+                else None
+            )
             verifier = self._verifier_registry.get_verifier(action.action_id)
             if verifier is None:
                 results.append(
@@ -90,7 +95,18 @@ class ExecutorEngine:
         )
         policy = RetryPolicy(max_attempts=max_attempts)
 
-        for action in plan.actions:
+        for action_index, action in enumerate(plan.actions):
+            if action_index in self._rejected_action_indexes:
+                results.append(
+                    ActionResult(
+                        action_id=action.action_id,
+                        status=ExecutionStatus.SKIPPED,
+                        message="Action rejected by human approval.",
+                        details={"reason": "human_rejection", "action_index": action_index},
+                    )
+                )
+                continue
+
             attempt = 0
             final_result: ActionResult | None = None
 

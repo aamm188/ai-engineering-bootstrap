@@ -285,26 +285,25 @@ def run_pipeline(
     )
 
     if interactive_approval and result.is_pending_approval:
-        approved = True
-        approved_ids: dict[str, str] = {}
+        approval_ids: dict[str, list[str]] = {}
         for request in result.approval_requests:
+            approval_target = request.reason or request.action_id
             answer = typer.confirm(
-                f"Approve {request.action_id} ({request.risk_level})?",
+                f"Approve {approval_target} ({request.risk_level})?",
                 default=False,
             )
             if answer:
                 approval_provider.approve(request.approval_id)
-                approved_ids[request.action_id] = request.approval_id
             else:
-                approved = False
                 approval_provider.reject(request.approval_id)
-        if approved:
-            result = engine.run(
-                mode=mode,
-                approval_provider=approval_provider,
-                pending_approvals=approved_ids,
-                run_id=run_id,
-            )
+            approval_ids.setdefault(request.action_id, []).append(request.approval_id)
+
+        result = engine.run(
+            mode=mode,
+            approval_provider=approval_provider,
+            pending_approvals=approval_ids,
+            run_id=run_id,
+        )
     # 1. Audit
     r = result.audit_report.readiness
     console.print(f"[bold]1. Audit Complete:[/bold] Health Score {r.health_score}/100")

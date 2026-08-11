@@ -60,18 +60,26 @@ logic.
 22. Environment Dependency Discovery & Remediation Planning
 23. Controlled Real Action Pack — Phase 1
 24. Dependency Installation Workflow
-
-## Next Milestones
-
 25. Failure → Recovery → Re-plan Integration
 26. Execution Audit & Run Evidence
 27. Agent Runtime / Session Boundary
+
+## Next Milestones
+
 28. End-to-End Autonomous Environment Bootstrap
 29. Engineering Environment Bootstrap + Cursor Integration
 30. End-to-End Hardening & Security
 31. Stable Backend API / Service Boundary
 32. GUI Foundation
 33. Professional GUI
+
+## Milestones 25–27 Boundary
+
+25. Recovery is bounded: a failed execution may trigger a fresh audit and deterministic re-plan, with validation and the same approval/safety boundary applied again. Re-plan count is explicitly capped.
+
+26. Every pipeline run produces structured in-memory evidence containing ordered stage events, run identity, timestamps, recovery activity, and terminal status. Persistence is intentionally deferred.
+
+27. Agent decisions run inside an explicit session boundary. The Agent runtime can decide and produce a plan, but exposes no execution capability and cannot bypass Planner, SafetyGate, Approval, Executor, or Verification.
 
 ## Cursor Boundary
 

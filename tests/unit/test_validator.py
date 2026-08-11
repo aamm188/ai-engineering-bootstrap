@@ -52,6 +52,54 @@ def test_validate_duplicate_actions_fails() -> None:
     assert result.is_valid is False
     assert any("duplicate" in err.lower() for err in result.errors)
 
+
+def test_validate_same_action_id_with_different_packages_is_valid() -> None:
+    """Same handler action may target different packages in one plan."""
+    actions = [
+        ExecutionPlanAction(
+            action_id="install_python_package",
+            description="Install colorama",
+            priority=1,
+            context={"package": "colorama"},
+        ),
+        ExecutionPlanAction(
+            action_id="install_python_package",
+            description="Install requests",
+            priority=1,
+            context={"package": "requests"},
+        ),
+    ]
+    plan = _make_plan(actions)
+
+    result = ExecutionPlanValidator().validate(plan)
+
+    assert result.is_valid is True
+    assert result.errors == []
+
+
+def test_validate_same_action_and_package_fails() -> None:
+    """An identical action target must still be rejected as a duplicate."""
+    actions = [
+        ExecutionPlanAction(
+            action_id="install_python_package",
+            description="Install requests",
+            priority=1,
+            context={"package": "requests"},
+        ),
+        ExecutionPlanAction(
+            action_id="install_python_package",
+            description="Install requests again",
+            priority=2,
+            context={"package": "requests"},
+        ),
+    ]
+    plan = _make_plan(actions)
+
+    result = ExecutionPlanValidator().validate(plan)
+
+    assert result.is_valid is False
+    assert any("duplicate" in err.lower() for err in result.errors)
+
 def test_validate_missing_description_warning() -> None:
     """Missing description should trigger warning, not error."""
     action = ExecutionPlanAction(action_id="install_git", description="", priority=1)
