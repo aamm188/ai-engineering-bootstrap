@@ -2,50 +2,32 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AI Engineering Bootstrap</title>
 <style>
-:root{color-scheme:dark;font-family:Inter,system-ui,sans-serif;background:#0b1020;color:#e8ecf4}
-body{margin:0;background:linear-gradient(135deg,#0b1020,#131a2d);min-height:100vh}
-main{max-width:1200px;margin:0 auto;padding:28px}
-h1{margin:0 0 8px;font-size:28px}.muted{color:#95a1b5}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin:20px 0}.card{background:#151d32;border:1px solid #26324d;border-radius:16px;padding:18px;box-shadow:0 12px 30px #0003}.value{font-size:30px;font-weight:700;margin-top:10px}.ok{color:#61d095}.bad{color:#ff7d87}.warn{color:#f7c66b}button{background:#5c7cfa;color:white;border:0;border-radius:10px;padding:11px 15px;cursor:pointer;margin-right:8px}button:hover{filter:brightness(1.08)}pre{white-space:pre-wrap;background:#0a0f1d;padding:14px;border-radius:10px;overflow:auto;max-height:420px}table{width:100%;border-collapse:collapse;margin-top:10px}th,td{padding:10px;border-bottom:1px solid #28344e;text-align:left;font-size:14px}
+:root{color-scheme:dark;font-family:Inter,system-ui,sans-serif;background:#0b1020;color:#e8ecf4}body{margin:0;background:linear-gradient(135deg,#0b1020,#131a2d);min-height:100vh}main{max-width:1250px;margin:auto;padding:28px}.top{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap}.muted{color:#95a1b5}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:18px 0}.card{background:#151d32;border:1px solid #26324d;border-radius:16px;padding:18px;box-shadow:0 12px 30px #0003}.value{font-size:28px;font-weight:700;margin-top:8px}.ok{color:#61d095}.bad{color:#ff7d87}.warn{color:#f7c66b}.actions{display:grid;gap:12px}.action{border:1px solid #2b3957;border-radius:12px;padding:14px;background:#10182a}.row{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.pill{font-size:12px;padding:4px 8px;border-radius:999px;background:#26334e}.pending{background:#523f16}.done{background:#173d2b}.rejected{background:#4a2028}button{background:#5c7cfa;color:white;border:0;border-radius:10px;padding:10px 14px;cursor:pointer;margin:3px}button.secondary{background:#37445e}button.danger{background:#8e3f4b}button:disabled{opacity:.45;cursor:not-allowed}pre{white-space:pre-wrap;background:#0a0f1d;padding:14px;border-radius:10px;overflow:auto;max-height:420px}table{width:100%;border-collapse:collapse;margin-top:10px}th,td{padding:9px;border-bottom:1px solid #28344e;text-align:left;font-size:14px}.banner{padding:14px;border-radius:12px;background:#14213d;border:1px solid #2d4673;margin:18px 0}.small{font-size:13px}.hidden{display:none}
 </style>
 </head>
 <body>
 <main>
-<h1>AI Engineering Bootstrap</h1>
-<div class="muted">Stable backend + controlled execution dashboard</div>
-<div class="grid">
-<div class="card"><div class="muted">Health score</div><div id="score" class="value">—</div></div>
-<div class="card"><div class="muted">Development ready</div><div id="ready" class="value">—</div></div>
-<div class="card"><div class="muted">Cursor</div><div id="cursor" class="value">—</div></div>
-<div class="card"><div class="muted">Plan actions</div><div id="actions" class="value">—</div></div>
-</div>
-<div class="card">
-<button onclick="refreshAll()">Refresh</button>
-<button onclick="runSafe()">Run Safe Preview</button>
-</div>
-<div class="grid">
-<div class="card"><h3>Audit</h3><div id="audit"></div></div>
-<div class="card"><h3>Engineering Environment</h3><div id="engineering"></div></div>
-</div>
-<div class="card"><h3>Plan</h3><div id="plan"></div></div>
-<div class="card"><h3>Safe Run / Evidence</h3><pre id="run">—</pre></div>
+<div class="top"><div><h1>AI Engineering Bootstrap</h1><div class="muted">Live environment, plan, approval and execution control</div></div><div><button onclick="refreshAll()">Refresh</button><button onclick="startSession()">Start REAL Bootstrap</button></div></div>
+<div id="banner" class="banner">No active bootstrap session. Start a REAL Bootstrap to review and approve each action.</div>
+<div class="grid"><div class="card"><div class="muted">Health score</div><div id="score" class="value">—</div></div><div class="card"><div class="muted">Development ready</div><div id="ready" class="value">—</div></div><div class="card"><div class="muted">Cursor</div><div id="cursor" class="value">—</div></div><div class="card"><div class="muted">Planned actions</div><div id="actionsCount" class="value">—</div></div></div>
+<div class="grid"><div class="card"><h2>Environment Audit</h2><div id="audit">Loading…</div></div><div class="card"><h2>Engineering Environment</h2><div id="engineering">Loading…</div></div></div>
+<div class="card"><div class="row"><h2>Bootstrap Actions</h2><span id="sessionId" class="muted"></span></div><div id="actions" class="actions"><div class="muted">Start a bootstrap session to create actionable controls.</div></div></div>
+<div class="card"><h2>Execution / Evidence</h2><pre id="run">—</pre></div>
 </main>
 <script>
-const get=async p=>(await fetch(p)).json();
-function status(v){return v==='passed'||v==='available'||v===true?'<span class="ok">OK</span>':v==='failed'?'<span class="bad">FAILED</span>':'<span class="warn">'+v+'</span>'}
-async function refreshAll(){
- const [a,p,e]=await Promise.all([get('/api/v1/audit'),get('/api/v1/plan'),get('/api/v1/engineering')]);
- document.getElementById('score').textContent=a.readiness.health_score+'/100';
- document.getElementById('ready').innerHTML=status(a.readiness.development_ready);
- document.getElementById('cursor').innerHTML=e.cursor_available?'<span class="ok">AVAILABLE</span>':'<span class="bad">MISSING</span>';
- document.getElementById('actions').textContent=p.actions.length;
- document.getElementById('audit').innerHTML='<table><tr><th>Check</th><th>Status</th><th>Details</th></tr>'+a.checks.map(c=>`<tr><td>${c.name}</td><td>${status(c.status)}</td><td>${c.details||''}</td></tr>`).join('')+'</table>';
- document.getElementById('engineering').innerHTML='<table><tr><th>Tool</th><th>State</th><th>Path</th></tr>'+e.tools.map(t=>`<tr><td>${t.name}</td><td>${t.available?'<span class="ok">AVAILABLE</span>':'<span class="bad">MISSING</span>'}</td><td>${t.path||''}</td></tr>`).join('')+'</table>';
- document.getElementById('plan').innerHTML=p.actions.length?'<table><tr><th>Action</th><th>Description</th><th>Priority</th></tr>'+p.actions.map(x=>`<tr><td>${x.action_id}</td><td>${x.description}</td><td>${x.priority}</td></tr>`).join('')+'</table>':'<span class="ok">No actions required.</span>';
-}
-async function runSafe(){document.getElementById('run').textContent=JSON.stringify(await (await fetch('/api/v1/run-safe',{method:'POST'})).json(),null,2);await refreshAll()}
+let sessionId=null;
+const req=async(path,opts={})=>{const r=await fetch(path,opts);const x=await r.json();if(!r.ok)throw new Error(x?.data?.error||x?.error||'Request failed');return x.data??x};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const stateClass=s=>s==='completed'?'done':s==='rejected'?'rejected':'pending';
+function status(v){return v===true||v==='passed'||v==='available'?'<span class="ok">OK</span>':v==='failed'||v==='MISSING'?'<span class="bad">FAILED</span>':'<span class="warn">'+esc(v)+'</span>'}
+async function refreshAll(){try{const [a,p,e]=await Promise.all([req('/api/v1/audit'),req('/api/v1/plan'),req('/api/v1/engineering')]);document.getElementById('score').textContent=a.readiness.health_score+'/100';document.getElementById('ready').innerHTML=status(a.readiness.development_ready);document.getElementById('cursor').innerHTML=e.cursor_available?'<span class="ok">AVAILABLE</span>':'<span class="bad">MISSING</span>';document.getElementById('actionsCount').textContent=p.actions.length;document.getElementById('audit').innerHTML='<table><tr><th>Check</th><th>Status</th><th>Details</th></tr>'+a.checks.map(c=>`<tr><td>${esc(c.name)}</td><td>${status(c.status)}</td><td>${esc(c.details||'')}</td></tr>`).join('')+'</table>';document.getElementById('engineering').innerHTML='<table><tr><th>Tool</th><th>State</th><th>Path</th></tr>'+e.tools.map(t=>`<tr><td>${esc(t.name)}</td><td>${t.available?'<span class="ok">AVAILABLE</span>':'<span class="bad">MISSING</span>'}</td><td>${esc(t.path||'')}</td></tr>`).join('')+'</table>';if(sessionId)await refreshSession()}catch(err){document.getElementById('run').textContent='Backend error: '+err.message}}
+async function startSession(){try{const data=await req('/api/v1/bootstrap-sessions',{method:'POST'});sessionId=data.session_id;renderSession(data);document.getElementById('banner').textContent='REAL Bootstrap session is active. Each action is approved or rejected independently.';await refreshAll()}catch(err){document.getElementById('run').textContent='Start failed: '+err.message}}
+async function refreshSession(){const data=await req('/api/v1/bootstrap-sessions/'+sessionId);renderSession(data)}
+function renderSession(data){document.getElementById('sessionId').textContent=data.session_id||'';document.getElementById('actions').innerHTML=(data.actions||[]).map(a=>{const locked=a.status!=='pending';return `<div class="action"><div class="row"><div><strong>${esc(a.description)}</strong><div class="muted small">${esc(a.action_id)}</div></div><span class="pill ${stateClass(a.status)}">${esc(a.status)}</span></div><div class="small muted">Risk: ${esc(a.risk_level||'n/a')}</div><div class="small">${a.context?.package?`Package: <strong>${esc(a.context.package)}</strong>`:''}${a.context?.download_url?`<br>Source: <strong>official</strong>`:''}</div>${locked?'':`<div><button onclick="resolveAction('${encodeURIComponent(a.action_id)}','approve')">Approve & Execute</button><button class="danger" onclick="resolveAction('${encodeURIComponent(a.action_id)}','reject')">Reject</button></div>`}</div>`}).join('')||'<div class="muted">No actions in this session.</div>';document.getElementById('run').textContent=JSON.stringify(data.results||{},null,2)}
+async function resolveAction(encodedId,decision){try{const id=decodeURIComponent(encodedId);const data=await req(`/api/v1/bootstrap-sessions/${sessionId}/actions/${encodeURIComponent(id)}/${decision}`,{method:'POST'});renderSession(data);await refreshAll()}catch(err){document.getElementById('run').textContent='Action failed: '+err.message}}
 refreshAll();
 </script>
 </body>
