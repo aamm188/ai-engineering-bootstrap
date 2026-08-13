@@ -15,6 +15,7 @@ class BackendRequestHandler(BaseHTTPRequestHandler):
 
     backend = ApplicationBackend()
     gui_root = Path(__file__).resolve().parents[1] / "gui" / "static"
+    server_instance: ThreadingHTTPServer | None = None
 
     def _write(self, status: int, payload: dict, content_type: str = "application/json") -> None:
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
@@ -88,14 +89,22 @@ class BackendRequestHandler(BaseHTTPRequestHandler):
             if path == "/api/v1/bootstrap-sessions":
                 self._result(self.backend.start_bootstrap_session())
                 return
+            if path == "/api/v1/shutdown":
+                self._result(self.backend.stop_server(self.server))
+                return
             marker = "/api/v1/bootstrap-sessions/"
             if path.startswith(marker):
                 suffix = path[len(marker):]
                 parts = suffix.split("/")
                 if len(parts) == 4 and parts[1] == "actions" and parts[3] in {"approve", "reject"}:
+                    try:
+                        action_index = int(parts[2])
+                    except ValueError:
+                        self._write(400, {"status": "bad_request", "error": "Action index must be an integer."})
+                        return
                     result = self.backend.resolve_action(
                         parts[0],
-                        parts[2],
+                        action_index,
                         parts[3] == "approve",
                     )
                     self._result(result)
@@ -112,6 +121,7 @@ class BackendRequestHandler(BaseHTTPRequestHandler):
 def serve(host: str = "127.0.0.1", port: int = 8787) -> None:
     """Run the stable backend and local GUI."""
     server = ThreadingHTTPServer((host, port), BackendRequestHandler)
+    BackendRequestHandler.server_instance = server
     print(f"AI Engineering Bootstrap: http://{host}:{port}")
     try:
         server.serve_forever()

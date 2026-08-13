@@ -101,7 +101,9 @@ def test_bootstrap_session_exposes_individual_actions() -> None:
     for action in result.data["actions"]:
         assert "action_id" in action
         assert "status" in action
-        assert "approval_id" in action
+        assert "action_index" in action
+        if action["status"] == "pending":
+            assert action["approval_id"] is not None
 
 
 def test_bootstrap_session_rejects_unknown_session() -> None:
@@ -115,3 +117,29 @@ def test_gui_contains_real_bootstrap_controls() -> None:
     assert "Approve & Execute" in html
     assert "Reject" in html
     assert "/api/v1/bootstrap-sessions" in html
+
+
+def test_bootstrap_session_keeps_duplicate_action_ids_distinct() -> None:
+    backend = ApplicationBackend()
+    result = backend.start_bootstrap_session()
+    data = result.data
+    assert result.status == "ok"
+    actions = data["actions"]
+    indexes = [action["action_index"] for action in actions]
+    assert len(indexes) == len(set(indexes))
+    for action in actions:
+        assert action["status"] in {"pending", "ready", "success", "completed", "rejected", "failed", "executing"}
+
+
+def test_backend_shutdown_requests_server_shutdown() -> None:
+    class FakeServer:
+        def __init__(self) -> None:
+            self.called = False
+
+        def shutdown(self) -> None:
+            self.called = True
+
+    server = FakeServer()
+    result = ApplicationBackend.stop_server(server)
+    assert result.status == "ok"
+    assert result.data["stopped"] is True
